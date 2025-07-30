@@ -1,9 +1,14 @@
 from flask import Flask
+from flask_jwt_extended import JWTManager
 from utils.db import get_db
 from routes.orders import orders_bp
 from routes.shipped import shipped_bp
+from routes.auth import auth_bp
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Use a strong secret, or load from .env
+
+jwt = JWTManager(app)
 
 @app.route('/')
 def home():
@@ -13,6 +18,7 @@ def home():
 
 app.register_blueprint(orders_bp)
 app.register_blueprint(shipped_bp)
+app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
