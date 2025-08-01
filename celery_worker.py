@@ -2,7 +2,7 @@ from celery import Celery
 
 celery = Celery(
     'storeApp',
-    broker='pyamqp://guest:guest@localhost:5672//',  # Update with your RabbitMQ URL
+    broker='pyamqp://guest:guest@rabbitmq:5672//',  # Update with your RabbitMQ URL
     backend='rpc://'
 )
 

@@ -5,10 +5,11 @@ from routes.orders import orders_bp
 from routes.shipped import shipped_bp
 from routes.auth import auth_bp
 import os
+from flasgger import Swagger
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Use a strong secret, or load from .env
-
+swagger = Swagger(app)
 jwt = JWTManager(app)
 
 @app.route('/')

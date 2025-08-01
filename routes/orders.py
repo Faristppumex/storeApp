@@ -15,6 +15,30 @@ orders_bp = Blueprint('orders', __name__)
 @orders_bp.route('/api/v1/orders', methods=['POST'])
 @jwt_required()
 def create_order():
+    """
+    Create a new order
+    ---
+    tags:
+      - Orders
+    parameters:
+      - in: body
+        name: body
+        schema:
+          type: object
+          required:
+            - item
+            - quantity
+          properties:
+            item:
+              type: string
+            quantity:
+              type: integer
+    responses:
+      201:
+        description: Order created
+      400:
+        description: Invalid input
+    """
     return create_order_service(request)
 
 @orders_bp.route('/api/v1/orders/<int:order_id>', methods=['GET'])
