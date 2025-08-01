@@ -1,6 +1,8 @@
 from utils.db import get_db
 from flask import request, jsonify
 
+from tasks import send_email
+
 def create_order_service(request):
     data = request.get_json()
     conn = get_db()
@@ -98,4 +100,6 @@ def ship_order_service(request):
     conn.commit()
     cur.close()
     conn.close()
+    send_email.delay(order_id)
+    
     return jsonify({'message': f'Order {order_id} shipped.'}), 200
