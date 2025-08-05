@@ -31,7 +31,7 @@ def create_order():
           properties:
             item:
               type: string
-            quantity:
+              quantity:
               type: integer
     responses:
       201:
@@ -59,6 +59,9 @@ def remove_order(order_id):
 @orders_bp.route('/api/v1/delete_all', methods=['DELETE'])
 @jwt_required()
 def delete_all():
+    identity = get_jwt_identity()
+    if identity.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
     return delete_all_orders_service()
 
 @orders_bp.route('/api/v1/get_all', methods=['GET'])
@@ -69,4 +72,7 @@ def get_all():
 @orders_bp.route('/api/v1/ship_order', methods=['POST'])
 @jwt_required()
 def ship_order():
+    identity = get_jwt_identity()
+    if identity.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
     return ship_order_service(request)

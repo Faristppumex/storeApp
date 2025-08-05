@@ -4,6 +4,7 @@ from utils.db import get_db
 from routes.orders import orders_bp
 from routes.shipped import shipped_bp
 from routes.auth import auth_bp
+from routes.product import products_bp
 import os
 from flasgger import Swagger
 

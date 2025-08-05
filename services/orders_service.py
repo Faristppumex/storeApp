@@ -1,18 +1,38 @@
 from utils.db import get_db
 from flask import request, jsonify
 
+from flask_jwt_extended import get_jwt_identity
+
 from tasks import send_email
 
 def create_order_service(request):
     data = request.get_json()
+    product_id = data.get('product_id')
+    identity = get_jwt_identity()
+    user_id = identity['id'] if isinstance(identity, dict) and 'id' in identity else identity
+    if not product_id or not user_id:
+        return jsonify({'error': 'product_id and user_id are required'}), 400
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('INSERT INTO orders (item, quantity) VALUES (%s, %s) RETURNING id', (data['item'], data['quantity']))
+    cur.execute('SELECT * FROM product WHERE id = %s', (product_id,))
+    product = cur.fetchone()
+    if not product:
+        cur.close()
+        conn.close()
+        return jsonify({'error': 'Product not found'}), 404
+    # Example: insert order with user_id, product_id, total_amount, payment_status, order_status, created_at
+    total_amount = product['price']
+    payment_status = 'pending'
+    order_status = 'created'
+    from datetime import datetime
+    created_at = datetime.utcnow()
+    cur.execute('INSERT INTO orders (user_id, total_amount, payment_status, order_status, created_at) VALUES (%s, %s, %s, %s, %s) RETURNING id',
+                (user_id, total_amount, payment_status, order_status, created_at))
     order_id = cur.fetchone()['id']
     conn.commit()
     cur.close()
     conn.close()
-    return jsonify({'order_id': order_id, 'order': {'item': data['item'], 'quantity': data['quantity']}}), 201
+    return jsonify({'order_id': order_id, 'product': {'id': product['id'], 'name': product['name'], 'price': product['price']}}), 201
 
 def get_order_service(order_id):
     conn = get_db()
@@ -38,6 +58,7 @@ def get_orders_service():
         for order in orders
     ]
     return jsonify(result)
+
 
 def remove_order_service(order_id):
     conn = get_db()
