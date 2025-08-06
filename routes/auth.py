@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from utils.db import get_db
 auth_bp = Blueprint('auth', __name__)
+from tasks import send_email
 
 @auth_bp.route('/api/v1/signup', methods=['POST'])
 def signup():
@@ -23,6 +24,12 @@ def signup():
     conn.commit()
     cur.close()
     conn.close()
+    send_email({
+        'email': email,
+        'subject': 'Welcome to Store App',
+        'body': f'Hello {name}, welcome to Store App!'
+    })
+    
     return jsonify({'msg': 'User created successfully'}), 201
 
 @auth_bp.route('/api/v1/login', methods=['POST'])

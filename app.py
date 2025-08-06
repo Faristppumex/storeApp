@@ -21,6 +21,7 @@ def home():
 
 app.register_blueprint(orders_bp)
 app.register_blueprint(shipped_bp)
+app.register_blueprint(products_bp)
 app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
