@@ -2,13 +2,14 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from services.product_services import (
     get_product_service,
-    get_products_service
+    get_products_service,
+    create_product_service
 )
 
 products_bp = Blueprint('products', __name__)
 
 @products_bp.route('/api/v1/products/<int:product_id>', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_products(product_id):
     """
     Get a product by ID
@@ -30,7 +31,7 @@ def get_products(product_id):
     return get_product_service(product_id)
 
 @products_bp.route('/api/v1/products', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_all_products():
     """
     Get all products
@@ -42,3 +43,31 @@ def get_all_products():
         description: List of products
     """
     return get_products_service()
+@products_bp.route('/api/v1/products', methods=['POST'])
+def create_product():
+    """
+    Create a new product
+    ---
+    tags:
+      - Products
+    parameters:
+      - in: body
+        name: product
+        description: Product object to be created
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            price:
+              type: number
+    responses:
+      201:
+        description: Product created successfully
+      400:
+        description: Invalid input data
+    """
+    return create_product_service(request)

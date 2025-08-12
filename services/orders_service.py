@@ -1,5 +1,6 @@
 from utils.db import get_db
 from flask import request, jsonify
+import math
 
 from flask_jwt_extended import get_jwt_identity
 
@@ -46,18 +47,63 @@ def get_order_service(order_id):
     else:
         return jsonify({'error': 'Order not found'}), 404
 
-def get_orders_service():
+def get_orders_service(page=1, per_page=10):
+    # identity = get_jwt_identity()
+    # user_id = identity['id'] if isinstance(identity, dict) and 'id' in identity else identity
+    
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM orders')
+    
+    # Get total count for pagination
+    cur.execute('SELECT COUNT(*) FROM orders WHERE user_id = %s', (user_id,))
+    total = cur.fetchone()['count']
+    
+    # Calculate offset
+    offset = (page - 1) * per_page
+    
+    # Get paginated orders
+    cur.execute('''
+        SELECT * FROM orders 
+        WHERE user_id = %s 
+        ORDER BY created_at DESC 
+        LIMIT %s OFFSET %s
+    ''', (user_id, per_page, offset))
+    
     orders = cur.fetchall()
+    print("orders: ", orders)
+    print("offset ", offset)
+    print("page ", page)
     cur.close()
     conn.close()
+    
+    # Calculate pagination info
+    total_pages = math.ceil(total / per_page)
+    has_next = page < total_pages
+    has_prev = page > 1
+    
     result = [
-        {'order_id': order['id'], 'item': order['item'], 'quantity': order['quantity']}
+        {
+            'id': order['id'],
+            'user_id': order['user_id'],
+            'total_amount': float(order['total_amount']),
+            'payment_status': order['payment_status'],
+            'order_status': order['order_status'],
+            'created_at': order['created_at'].isoformat() if order['created_at'] else None
+        }
         for order in orders
     ]
-    return jsonify(result)
+    
+    return jsonify({
+        'orders': result,
+        'pagination': {
+            'page': page,
+            'per_page': per_page,
+            'total': total,
+            'pages': total_pages,
+            'has_next': has_next,
+            'has_prev': has_prev
+        }
+    })
 
 
 def remove_order_service(order_id):

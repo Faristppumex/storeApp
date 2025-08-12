@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.orders_service import (
     create_order_service,
     get_order_service,
@@ -47,9 +47,51 @@ def get_order(order_id):
     return get_order_service(order_id)
 
 @orders_bp.route('/api/v1/orders', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_orders():
-    return get_orders_service()
+    """
+    Get orders with pagination
+    ---
+    tags:
+      - Orders
+    parameters:
+      - in: query
+        name: page
+        type: integer
+        default: 1
+        description: Page number
+      - in: query
+        name: per_page
+        type: integer
+        default: 10
+        description: Items per page (max 100)
+    responses:
+      200:
+        description: Paginated orders
+        schema:
+          type: object
+          properties:
+            orders:
+              type: array
+            pagination:
+              type: object
+              properties:
+                page:
+                  type: integer
+                per_page:
+                  type: integer
+                total:
+                  type: integer
+                pages:
+                  type: integer
+                has_next:
+                  type: boolean
+                has_prev:
+                  type: boolean
+    """
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)  # Max 100 items per page
+    return get_orders_service(page, per_page)
 
 @orders_bp.route('/api/v1/orders/<int:order_id>', methods=['DELETE'])
 @jwt_required()

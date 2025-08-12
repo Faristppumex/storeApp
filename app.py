@@ -7,11 +7,13 @@ from routes.auth import auth_bp
 from routes.product import products_bp
 import os
 from flasgger import Swagger
+from migrations.create_tables import run_migration
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Use a strong secret, or load from .env
 swagger = Swagger(app)
 jwt = JWTManager(app)
+
 
 @app.route('/')
 def home():
