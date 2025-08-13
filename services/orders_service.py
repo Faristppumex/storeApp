@@ -55,7 +55,7 @@ def get_orders_service(page=1, per_page=10):
     cur = conn.cursor()
     
     # Get total count for pagination
-    cur.execute('SELECT COUNT(*) FROM orders WHERE user_id = %s', (user_id,))
+    cur.execute('SELECT COUNT(*) FROM orders ')
     total = cur.fetchone()['count']
     
     # Calculate offset
@@ -64,10 +64,9 @@ def get_orders_service(page=1, per_page=10):
     # Get paginated orders
     cur.execute('''
         SELECT * FROM orders 
-        WHERE user_id = %s 
         ORDER BY created_at DESC 
         LIMIT %s OFFSET %s
-    ''', (user_id, per_page, offset))
+    ''', ( per_page, offset))
     
     orders = cur.fetchall()
     print("orders: ", orders)

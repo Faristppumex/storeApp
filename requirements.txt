@@ -1,7 +1,9 @@
-Flask
+flask
+flask-jwt-extended
 psycopg2-binary
-python-dotenv
-Flask-JWT-Extended
 celery
-flasgger
 boto3
+flasgger
+flask-socketio
+python-dotenv
+pandas
